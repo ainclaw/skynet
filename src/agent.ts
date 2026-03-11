@@ -60,10 +60,20 @@ export class Agent {
       console.log('[AGENT] ✅ Skynet hub is healthy');
     }
 
+    // 读取邀请人信息（通过环境变量或命令行参数）
+    const referredBy = process.env.REFERRED_BY || process.argv.find(arg => arg.startsWith('--ref='))?.split('=')[1];
+    if (referredBy) {
+      console.log(`[AGENT] 👤 Referred by: ${referredBy.slice(0, 16)}...`);
+    }
+
     console.log('[AGENT] Registering node...');
-    const regResult = await this.client.register();
+    const regResult = await this.client.register(referredBy);
     if (regResult.success) {
       console.log(`[AGENT] ✅ Registered: ${regResult.data?.message}`);
+      // 显示邀请链接
+      if (regResult.data?.inviteLink) {
+        console.log(`[AGENT] 🔗 你的邀请链接: ${regResult.data.inviteLink}`);
+      }
     } else {
       console.log(`[AGENT] ⚠️ Register response: ${regResult.error}`);
     }

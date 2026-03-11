@@ -1,12 +1,6 @@
 // ============================================
 // 鹰爪技能 · 天网中枢通信客户端
 // ============================================
-//
-// SkynetClient 封装了：
-// 1. HTTP 请求（带自动签名）
-// 2. WebSocket 连接（自动重连 + 事件监听）
-//
-// ============================================
 
 import { request } from 'undici';
 import WebSocket from 'ws';
@@ -56,9 +50,13 @@ export class SkynetClient {
     }
   }
 
-  /** 注册节点 */
-  async register(): Promise<ApiResponse<{ message: string; node: NodeInfo }>> {
-    return this.post('/api/register', 'register', { alias: this.config.alias });
+  /** 注册节点 - 支持邀请人 */
+  async register(referredBy?: string): Promise<ApiResponse<{ message: string; node: NodeInfo; inviteLink?: string }>> {
+    const payload: any = { alias: this.config.alias };
+    if (referredBy) {
+      payload.referredBy = referredBy;
+    }
+    return this.post('/api/register', 'register', payload);
   }
 
   /** 查询余额 */
@@ -118,98 +116,66 @@ export class SkynetClient {
 
   /** 连接 WebSocket */
   connectWs(): void {
-    if (this.ws) {
-      this.ws.close();
-    }
+    const wsUrl = this.config.wsUrl;
+    console.log(`[CLIENT] Connecting to WebSocket: ${wsUrl}`);
 
-    console.log(`[WS] Connecting to ${this.config.wsUrl}...`);
-
-    this.ws = new WebSocket(this.config.wsUrl);
+    this.ws = new WebSocket(wsUrl);
 
     this.ws.on('open', () => {
-      console.log('[WS] Connected ✓');
-
-      // 发送身份绑定
-      this.ws!.send(JSON.stringify({
-        type: 'auth',
-        publicKey: this.config.publicKey,
-      }));
-
-      // 启动心跳
-      this.startHeartbeat();
+      console.log('[CLIENT] ✅ WebSocket connected');
+      this.alive = true;
     });
 
-    this.ws.on('message', (raw: Buffer) => {
+    this.ws.on('message', (data) => {
       try {
-        const event = JSON.parse(raw.toString()) as WsEvent;
-        this.dispatchEvent(event);
-      } catch {
-        // 忽略非 JSON
+        const event = JSON.parse(data.toString()) as WsEvent;
+        this.handleWsEvent(event);
+      } catch (err) {
+        console.error('[CLIENT] Failed to parse WS message:', err);
       }
     });
 
     this.ws.on('close', () => {
-      console.log('[WS] Disconnected');
+      console.log('[CLIENT] 🔌 WebSocket disconnected');
+      this.alive = false;
       this.scheduleReconnect();
     });
 
     this.ws.on('error', (err) => {
-      console.error('[WS] Error:', err.message);
+      console.error('[CLIENT] WebSocket error:', err.message);
     });
   }
 
-  /** 监听 WS 事件 */
+  private scheduleReconnect(): void {
+    if (this.reconnectTimer) return;
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
+      if (this.alive === false) {
+        this.connectWs();
+      }
+    }, 5000);
+  }
+
+  private handleWsEvent(event: WsEvent): void {
+    const handlers = this.wsHandlers.get(event.type) || [];
+    handlers.forEach((handler) => handler(event));
+
+    // 默认日志
+    if (event.type === 'task_new') {
+      console.log(`[CLIENT] 📥 New task received: ${event.data?.taskId}`);
+    }
+  }
+
   on(eventType: string, handler: WsEventHandler): void {
     const handlers = this.wsHandlers.get(eventType) || [];
     handlers.push(handler);
     this.wsHandlers.set(eventType, handlers);
   }
 
-  /** 分发事件 */
-  private dispatchEvent(event: WsEvent): void {
-    // 精确匹配
-    const handlers = this.wsHandlers.get(event.type) || [];
-    for (const h of handlers) {
-      try { h(event); } catch (err) { console.error('[WS] Handler error:', err); }
-    }
-
-    // 通配符
-    const wildcardHandlers = this.wsHandlers.get('*') || [];
-    for (const h of wildcardHandlers) {
-      try { h(event); } catch (err) { console.error('[WS] Handler error:', err); }
-    }
-  }
-
-  /** 心跳 */
-  private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
-
-  private startHeartbeat(): void {
-    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
-
-    this.heartbeatTimer = setInterval(() => {
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        this.ws.send(JSON.stringify({ type: 'ping' }));
-      }
-    }, 30_000);
-  }
-
-  /** 自动重连 */
-  private scheduleReconnect(): void {
-    if (!this.alive) return;
-    if (this.reconnectTimer) return;
-
-    console.log('[WS] Reconnecting in 5s...');
-    this.reconnectTimer = setTimeout(() => {
-      this.reconnectTimer = null;
-      this.connectWs();
-    }, 5000);
-  }
-
-  /** 断开连接 */
   disconnect(): void {
-    this.alive = false;
-    if (this.heartbeatTimer) clearInterval(this.heartbeatTimer);
-    if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
-    if (this.ws) this.ws.close();
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
   }
 }
