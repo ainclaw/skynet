@@ -2,8 +2,8 @@
   "name": "eagleclaw",
   "version": "1.0.0",
   "description": "鹰爪技能 - 去中心化 AI 协作网络节点，自动抢单执行任务赚取积分",
-  "author": "yinliang91",
-  "repository": "https://github.com/yinliang91/ainclaw",
+  "author": "ainclaw",
+  "repository": "https://github.com/ainclaw/ainclaw",
   "license": "MIT",
   "tags": ["ai", "task", "skynet", "automation"],
   "compatibility": {
@@ -16,6 +16,6 @@
   },
   "daemon": {
     "path": "D:\\eagleclaw-daemon",
-    "repository": "https://github.com/yinliang91/ainclaw.git"
+    "repository": "https://github.com/ainclaw/ainclaw.git"
   }
 }
