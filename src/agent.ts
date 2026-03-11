@@ -1,13 +1,6 @@
 // ============================================
 // 鹰爪技能 · AI Agent 主循环
 // ============================================
-//
-// Agent 生命周期：
-// 1. 启动 → 注册节点 → 连接 WebSocket
-// 2. 主循环：轮询任务 → 匹配技能 → 抢单 → 执行 → 提交
-// 3. 同时监听 WebSocket 推送，实时响应新任务
-//
-// ============================================
 
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -60,10 +53,52 @@ export class Agent {
       console.log('[AGENT] ✅ Skynet hub is healthy');
     }
 
+    // 读取邀请人信息（通过环境变量或命令行参数）
+    const referredBy = process.env.REFERRED_BY || process.argv.find(arg => arg.startsWith('--ref='))?.split('=')[1];
+    if (referredBy) {
+      console.log(`[AGENT] 👤 Referred by: ${referredBy.slice(0, 16)}...`);
+    }
+
     console.log('[AGENT] Registering node...');
-    const regResult = await this.client.register();
+    const regResult = await this.client.register(referredBy);
     if (regResult.success) {
+      const balance = regResult.data?.balance || 0;
+      const inviteLink = regResult.data?.inviteLink || '';
+      
       console.log(`[AGENT] ✅ Registered: ${regResult.data?.message}`);
+      
+      // 打印邀请奖励信息
+      if (balance > 0) {
+        console.log('');
+        console.log('╔══════════════════════════════════════════════════╗');
+        console.log('║          🎉 注册成功！获得积分奖励              ║');
+        console.log('╠══════════════════════════════════════════════════╣');
+        console.log(`║  💰 获得积分：${balance}`);
+        console.log('╠══════════════════════════════════════════════════╣');
+        console.log('║          📢 邀请好友赚更多！                    ║');
+        console.log('╠══════════════════════════════════════════════════╣');
+        console.log(`║ 邀请链接：${inviteLink.slice(0, 40)}...`);
+        console.log('║                                                    ║');
+        console.log('║ 每成功邀请1位好友安装鹰爪：                     ║');
+        console.log('║   ✓ 你获得 100 积分                             ║');
+        console.log('║   ✓ 好友获得 100 积分                           ║');
+        console.log('║                                                    ║');
+        console.log('║ 快把邀请链接分享给朋友吧！                       ║');
+        console.log('╚══════════════════════════════════════════════════╝');
+        console.log('');
+      } else {
+        console.log('');
+        console.log('╔══════════════════════════════════════════════════╗');
+        console.log('║          📢 邀请好友赚积分！                    ║');
+        console.log('╠══════════════════════════════════════════════════╣');
+        console.log(`║ 邀请链接：${inviteLink.slice(0, 40)}...`);
+        console.log('║                                                    ║');
+        console.log('║ 每成功邀请1位好友安装鹰爪：                     ║');
+        console.log('║   ✓ 你获得 100 积分                             ║');
+        console.log('║   ✓ 好友获得 100 积分                           ║');
+        console.log('╚══════════════════════════════════════════════════╝');
+        console.log('');
+      }
     } else {
       console.log(`[AGENT] ⚠️ Register response: ${regResult.error}`);
     }
