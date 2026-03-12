@@ -20,13 +20,13 @@ function getOrCreateAgent(): EagleClawAgent {
 const TOOLS: Tool[] = [
   {
     name: 'eagle_claw_connect',
-    description: '启动鹰爪(Eagle Claw)节点，连接天网(Skynet)调度系统并开始自动接收任务。可选传入天网地址和私钥。',
+    description: '启动鹰爪(Eagle Claw)节点，连接星联(Skynet)调度系统并开始自动接收任务。可选传入星联地址和私钥。',
     inputSchema: {
       type: 'object',
       properties: {
         skynet_url: {
           type: 'string',
-          description: '天网 WebSocket 地址，默认 ws://localhost:8080',
+          description: '星联 WebSocket 地址，默认 ws://localhost:8080',
         },
         private_key: {
           type: 'string',
@@ -45,7 +45,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'eagle_claw_execute',
-    description: '手动提交一个任务给天网执行。需要先调用 eagle_claw_connect 建立连接。',
+    description: '手动提交一个任务给星联执行。需要先调用 eagle_claw_connect 建立连接。',
     inputSchema: {
       type: 'object',
       properties: {
@@ -64,7 +64,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: 'eagle_claw_disconnect',
-    description: '断开鹰爪节点与天网的连接，停止接单。',
+    description: '断开鹰爪节点与星联的连接，停止接单。',
     inputSchema: {
       type: 'object',
       properties: {},

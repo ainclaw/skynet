@@ -56,13 +56,13 @@ export class EagleClawAgent {
       this.ws = null;
     }
     this._connected = false;
-    console.log('🔌 鹰爪节点已断开天网连接');
+    console.log('🔌 鹰爪节点已断开星联连接');
     return '鹰爪节点已断开连接';
   }
 
   public async submitTask(taskType: string, payload: string): Promise<string> {
     if (!this._connected) {
-      throw new Error('节点未连接天网，请先调用 eagle_claw_connect');
+      throw new Error('节点未连接星联，请先调用 eagle_claw_connect');
     }
 
     const taskId = `manual-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -107,12 +107,12 @@ export class EagleClawAgent {
 
   private connectToSkynet(): Promise<void> {
     return new Promise((resolve, reject) => {
-      console.log(`🌐 正在连接天网: ${CONFIG.SKYNET_WS_URL}`);
+      console.log(`🌐 正在连接星联: ${CONFIG.SKYNET_WS_URL}`);
       this.ws = new WebSocket(CONFIG.SKYNET_WS_URL);
 
       const onOpenOnce = () => {
         this._connected = true;
-        console.log('✅ 天网连接成功');
+        console.log('✅ 星联连接成功');
         this.send({
           type: 'handshake',
           nodeId: this.identity.getPublicKey(),
@@ -140,7 +140,7 @@ export class EagleClawAgent {
 
       this.ws.on('close', () => {
         this._connected = false;
-        console.log('🔄 天网断开，5秒后重连...');
+        console.log('🔄 星联断开，5秒后重连...');
         this.reconnectTimer = setTimeout(() => {
           this.connectToSkynet().catch((e) =>
             console.error('重连失败:', e.message)

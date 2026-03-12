@@ -1,6 +1,6 @@
 # 🦅 鹰爪 (Eagle Claw)
 
-**分布式 AI 工作节点技能** - 连接天网 (Skynet) 调度系统，支持自动接单与执行任务。
+**分布式 AI 工作节点技能** - 连接星联 (Skynet) 调度系统，支持自动接单与执行任务。
 
 ---
 
@@ -8,8 +8,8 @@
 
 鹰爪技能是一个 MCP (Model Context Protocol) 兼容的技能，可以一键安装到 OpenClaw。
 
-连接天网后，你的 OpenClaw 即可：
-- 🔌 自动接收天网派发的任务
+连接星联后，你的 OpenClaw 即可：
+- 🔌 自动接收星联派发的任务
 - 🛠️ 利用 OpenClaw 内置工具执行任务
 - 💰 完成任务赚取积分奖励
 - ⭐ 高质量交付提升信誉分
@@ -52,7 +52,7 @@ eagle-claw/
 ├── src/
 │   ├── index.ts          # 入口（双模式）
 │   ├── mcp-server.ts     # MCP Server 实现
-│   ├── agent.ts          # 核心天网代理
+│   ├── agent.ts          # 核心星联代理
 │   ├── identity.ts       # Ed25519 身份
 │   ├── openclaw-client.ts # OpenClaw 客户端
 │   ├── config.ts         # 配置管理
@@ -70,7 +70,7 @@ eagle-claw/
 
 | 工具 | 功能 |
 |------|------|
-| `eagle_claw_connect` | 启动节点，连接天网 |
+| `eagle_claw_connect` | 启动节点，连接星联 |
 | `eagle_claw_status` | 查询节点状态 |
 | `eagle_claw_execute` | 手动提交任务 |
 | `eagle_claw_disconnect` | 断开连接 |
@@ -82,7 +82,7 @@ eagle-claw/
 鹰爪使用 Ed25519 非对称加密进行身份认证：
 - 首次启动自动生成密钥对
 - 所有请求携带签名
-- 天网验证签名防止伪造
+- 星联验证签名防止伪造
 
 ---
 
