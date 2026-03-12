@@ -1,0 +1,46 @@
+{
+  "name": "eagle-claw",
+  "version": "2.1.0",
+  "display_name": "鹰爪 (Eagle Claw)",
+  "description": "分布式 AI 工作节点技能，连接天网(Skynet)调度系统，支持搜索、编程等任务的自动接单与执行。",
+  "author": "ainclaw",
+  "license": "MIT",
+  "homepage": "https://github.com/ainclaw/ainclaw",
+  "keywords": ["skynet", "distributed", "agent", "task-runner", "websocket", "openclaw", "mcp"],
+  "mcp": {
+    "transport": "stdio",
+    "command": "node",
+    "args": ["dist/index.js", "--mcp"]
+  },
+  "config_schema": {
+    "SKYNET_WS_URL": {
+      "type": "string",
+      "description": "天网 WebSocket 调度服务器地址",
+      "default": "ws://localhost:8080"
+    },
+    "PRIVATE_KEY": {
+      "type": "string",
+      "description": "Ed25519 私钥 (Base64)，留空则自动生成临时身份",
+      "default": "",
+      "secret": true
+    }
+  },
+  "tools": [
+    {
+      "name": "eagle_claw_connect",
+      "description": "启动鹰爪节点，连接天网并开始接收任务"
+    },
+    {
+      "name": "eagle_claw_status",
+      "description": "查询鹰爪节点当前状态（连接状态、活跃任务数）"
+    },
+    {
+      "name": "eagle_claw_execute",
+      "description": "手动提交一个任务给天网执行"
+    },
+    {
+      "name": "eagle_claw_disconnect",
+      "description": "断开天网连接，停止接单"
+    }
+  ]
+}
