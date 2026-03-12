@@ -133,17 +133,36 @@
         点击下方按钮，自动下载并安装鹰爪技能
       </p>
       
-      <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+      <h3 style="margin: 1.5rem 0 1rem; color: #00ff88;">方式 1：安装独立 Daemon（推荐）</h3>
+      <p style="color: #888; margin-bottom: 1rem;">独立运行，不依赖 OpenClaw，连接到天网中枢</p>
+      
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
         <a href="install.ps1" class="btn" download="install.ps1">
           📥 下载安装脚本
         </a>
-        <button onclick="copyCommand()" class="btn btn-secondary">
+        <button onclick="copyCommand('daemon')" class="btn btn-secondary">
           📋 复制安装命令
         </button>
       </div>
 
-      <div class="code" id="install-command">
+      <div class="code" id="install-command-daemon">
         powershell -Command "iwr -useb https://ainclaw.com/install.ps1 | iex"
+      </div>
+
+      <h3 style="margin: 2rem 0 1rem; color: #00ff88;">方式 2：安装到 OpenClaw</h3>
+      <p style="color: #888; margin-bottom: 1rem;">安装为 OpenClaw Skill，需要已安装 OpenClaw</p>
+      
+      <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+        <a href="install-to-openclaw.ps1" class="btn btn-secondary" download="install-to-openclaw.ps1">
+          📥 下载 OpenClaw 安装脚本
+        </a>
+        <button onclick="copyCommand('openclaw')" class="btn btn-secondary">
+          📋 复制安装命令
+        </button>
+      </div>
+
+      <div class="code" id="install-command-openclaw">
+        powershell -Command "iwr -useb https://ainclaw.com/install-to-openclaw.ps1 | iex"
       </div>
 
       <div id="copy-success" class="success" style="display: none;">
@@ -239,12 +258,13 @@
   </div>
 
   <script>
-    function copyCommand() {
-      const command = document.getElementById('install-command').textContent;
+    function copyCommand(type) {
+      const command = document.getElementById('install-command-' + type).textContent;
       navigator.clipboard.writeText(command.trim()).then(() => {
-        document.getElementById('copy-success').style.display = 'block';
+        const successDiv = document.getElementById('copy-success');
+        successDiv.style.display = 'block';
         setTimeout(() => {
-          document.getElementById('copy-success').style.display = 'none';
+          successDiv.style.display = 'none';
         }, 5000);
       });
     }
