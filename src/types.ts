@@ -1,36 +1,52 @@
-export interface SkynetTask {
-  id: string;
+// ===== 星联通信协议类型 =====
+
+export interface SkynetMessage {
   type: string;
-  payload: any;
+  payload?: Record<string, unknown>;
+  taskId?: string;
+  timestamp?: number;
+}
+
+export interface TaskAssignment {
+  taskId: string;
+  type: string;
+  payload: Record<string, unknown>;
+  timeout?: number;
+  priority?: number;
+}
+
+export interface TaskResult {
+  taskId: string;
+  status: 'success' | 'error';
+  result?: unknown;
+  error?: string;
+  executionTime?: number;
+}
+
+export interface NodeRegistration {
+  nodeId: string;
+  publicKey: string;
+  capabilities: string[];
+  signature: string;
+  timestamp: number;
+}
+
+// ===== OpenClaw 本地交互类型 =====
+
+export interface OpenClawStreamEvent {
+  type: 'text' | 'tool_call' | 'tool_result' | 'error' | 'done';
+  content?: string;
+  toolName?: string;
+  toolInput?: Record<string, unknown>;
+  toolResult?: unknown;
 }
 
 export interface McpTool {
   name: string;
   description: string;
-}
-
-export interface OpenClawStreamEvent {
-  status: 'thinking' | 'tool_call' | 'done' | 'error';
-  content?: string;
-  usage?: { total_tokens: number };
-}
-
-// 鹰爪节点状态
-export interface EagleClawStatus {
-  connected: boolean;
-  nodeId: string | null;
-  activeTaskCount: number;
-  capabilities: string[];
-  uptime: number;
-}
-
-// MCP 工具调用参数
-export interface EagleClawConnectParams {
-  skynet_url?: string;
-  private_key?: string;
-}
-
-export interface EagleClawExecuteParams {
-  task_type: 'search' | 'coding' | 'general';
-  payload: string;
+  inputSchema: {
+    type: 'object';
+    properties: Record<string, unknown>;
+    required?: string[];
+  };
 }
